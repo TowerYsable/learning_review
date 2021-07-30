@@ -9,4 +9,6 @@
   - [x] 4. PCA、LDA
   - [x] 5. 集成学习 Ensemble_Method
   - [x] 6. 决策树
+  - [x] 7. Bayes Network
+  - [ ] 8. 
 
