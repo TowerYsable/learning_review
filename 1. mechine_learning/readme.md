@@ -7,5 +7,6 @@
   - [x] 2. 逻辑回归
   - [x] 3. SVM
   - [x] 4. PCA、LDA
-  - [ ] 5. 集成学习 Ensemble_Method
+  - [x] 5. 集成学习 Ensemble_Method
+  - [x] 6. 决策树
 
