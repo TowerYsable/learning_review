@@ -49,3 +49,18 @@
   - NNLM
   - word2vec
   - sense2vec
+
+
+
+## 2. fastText
+
+- **提出的原因**：“dog”和“dogs”分别⽤两个不同的向量表⽰，而word2vec模型中并未直接表达这两个向量之间的关系；鉴于此，fastText提出了⼦词嵌⼊(subword embedding)的⽅法，从而试图将构词信息引⼊word2vec中的CBOW
+- **核心思想：**将整个文档的词与n-gram向量叠加平均得到文档向量，然后使用文档向量做softmax多分类
+- **两个技巧：**
+  - 字符级的n-gram
+  - 分层softmax分类
+
+## 3. Glove
+
+## 4. textRNN & textCNN
+
