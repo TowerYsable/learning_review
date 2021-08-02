@@ -1,0 +1,37 @@
+Number    Tag     Description
+1.	CC	Coordinating conjunction  连词
+2.	CD	Cardinal number  基数
+3.	DT	Determiner  限定词
+4.	EX	Existential there
+5.	FW	Foreign word
+6.	IN	Preposition or subordinating conjunction  从属连词   
+7.	JJ	Adjective  形容词
+8.	JJR	Adjective, comparative   形容词比较级
+9.	JJS	Adjective, superlative    形容词最高级
+10.	LS	List item marker    列表项标记
+11.	MD	Modal    情态动词
+12.	NN	Noun, singular or mass
+13.	NNS	Noun, plural
+14.	NNP	Proper noun, singular  专有名词，单数
+15.	NNPS	Proper noun, plural  专有名词，复数
+16.	PDT	Predeterminer    前置限定词
+17.	POS	Possessive ending    所有格结束词
+18.	PRP	Personal pronoun   人称代词
+19.	PRP$	Possessive pronoun    物主代词
+20.	RB	Adverb    副词
+21.	RBR	Adverb, comparative    副词，比较级
+22.	RBS	Adverb, superlative    副词，最高级
+23.	RP	Particle    分词
+24.	SYM	Symbol    符号
+25.	TO	to
+26.	UH	Interjection    感叹词
+27.	VB	Verb, base form    动词，原形
+28.	VBD	Verb, past tense    动词，过去式
+29.	VBG	Verb, gerund or present participle  动词，动名词或现在分词    
+30.	VBN	Verb, past participle    动词，过去分词  
+31.	VBP	Verb, non-3rd person singular present    动词，非第三人称单数    
+32.	VBZ	Verb, 3rd person singular present    动词，第三人称单数
+33.	WDT	Wh-determiner    Wh-限定词
+34.	WP	Wh-pronoun    Wh-代词（疑问代词）
+35.	WP$	Possessive wh-pronoun    疑问代词所有格 
+36.	WRB	Wh-adverb    疑问副词
