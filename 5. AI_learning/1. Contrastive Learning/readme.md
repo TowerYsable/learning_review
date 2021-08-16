@@ -66,27 +66,110 @@
 ### Memory Bank
 
 - **缘由：**使用infoNCE loss的时候，一般希望能提供尽量多的负样例及逆行优化，但运算能力有限
-- **思想：**在开始训练之前，先将所有图片的表示计算好储存起来
+- **思想：**在开始训练之前，先将所有图片的表示计算好储存起来，叫做memory bank。
+  - **Bank中的表示将作为负例**的表示参与构建对比损失
+  - 每次迭代更新参数后，当前batch中样例对应的memory bank中的表示将会用更新后的参数更新，以这样的方式慢慢更新memory bank中的样例表示。
+  - 这种方式就不需要对大量负样例做前馈和反向传播运算，大大降低了运算量。
+- **缺点**
+  - 当样例数目很大时，需要占用极大的内存。
+  - 样例迭代太慢，由于不同步更新的表示对应的表示函数不同，第一步batch更新的表示和第10000步batch更新的表示对应的函数参数可能差别非常大，造成了不一致的情况，那这两种表示进行对比会有很大的噪声。
 
 ### MoCo v1
 
+![image-20210816194952077](readme.assets/image-20210816194952077.png)
+
+- **缘由：**针对Memory Bank存在的缺陷
+- **思想：**
+  - MoCo不再和Memory Bank一样，存储所有的样例，而是保留了一个相对较短**固定长度动态更新**的队列
+  - 每次迭代后，当前batch通过$f^k_{\theta_k}$前馈得到的新的样例表示将加入队列，而最早加入队列的相同数目也会同时被移除队列，以保证固定长度
+  - 首先降低了占用内存的大小，同时保证队列中最早和最新的表示差距不至于过大，保证了一致性，使得对比模型训练更加稳定。
+- **算法：**
+
+![image-20210816195350012](readme.assets/image-20210816195350012.png)
+
 ### SimCLR
+
+![image-20210816205709177](readme.assets/image-20210816205709177.png)
+
+- **缘由：**负样例是越多越好呢？还是？（google用了128核的TPU）
+- **思想：**
+  - $\tau$表示随机的图像增强方式
+  - $f(x)$为**编码**器Resnet
+  - $g(·)$为**映射**函数，单层的多层感知机
+  - 同一个样例得到的$z_i$和$z_j$互为正样例，与其他样例得到的$z_{i^`}$和$z_{j^`}$互为负样例
+- **更多有趣的结论：**
+  - $z$不是最终的图像表示，实验证明，$h$作为表示输入下游任务效果更好，蕴含更多的语义信息
+  - 多种数据增强组合有更好的效果，图像中色彩扰动和空间扰动结合时效果最好。
+  - 非线性映射头对提升表示的质量非常重要
+  - batch size越大越好，训练时间越长越好
+- **缺点：**
+  - 越大的batch size，就有越大的可能包含错误负例，由于infoNCE损失的特性，这些错误负例会极大地影响损失函数进而提供错误信号影响模型学习
 
 ### BYOL
 
+![image-20210816214748958](readme.assets/image-20210816214748958.png)
+
+实现了只用正例进行有效地对比学习
+
+- **缘由：**那我们能不能不对比负例，只通过对比正例进行对比学习，这样不就可以规避上述问题了吗？(越大的batch size，就有越大的可能包含错误负例)
+  - 这直观上是不现实的，因为如果不拉远与负例的距离
+  - 只拉近正例间的距离
+  - 那么模型很容易使所有样例的表示塌缩到同一个常数表示，这时损失为0，同时表示也失去了任何信息。
+- **组成：**
+  - **在线网络（online network）：**前半部分与目标网络相同，之后再通过一个预测头，其结构与映射头相同
+    - 通过对比损失反向传播更新参数
+    - 参数$\theta$
+  - **目标网络（target network）：**与SimCLR类似，一个编码器链接一个非线性的映射头
+    - 用动量更新的方式更新$\xi \leftarrow m·\xi + (1-m)·\theta$
+    - 参数$\gamma$
+  - **在线网络和目标网络异同点：**
+    - 网络参数更新方式不同，使用最简单的内积来定义距离，最终的loss形式为
+    - $L_{\theta}(v,v^`) = -1·(\frac{<f_{\theta}^0(v),f_{\xi}^t(v^`)>}{||f_{\theta}^0(v)||_2·||f_{\xi}^t(v^`)||_2} +\frac{<f_{\theta}^0(v^`),f_{\xi}^t(v)>}{||f_{\theta}^0(v^`)||_2·||f_{\xi}^t(v)||_2} )$
+- **损失函数：**
+  - 因为不用负例，故不使用InfoNCE loss
+  - 
+
 ### SimSiam
+
+实现了只用正例进行有效地对比学习
+
+<img src="readme.assets/image-20210816214843000.png" alt="image-20210816214843000" style="zoom: 50%;" />
+
+- **缘由：**
+  - BYOL强调动量更新对构造非对称结构避免表示塌缩非常重要，但SimSiam证明了真正重要的并不是动量更新，而是在于**不求导操作**。
+- **思想：**
+  - 与BYOL不同的是，SimSiam左右两支共享参数，只是对对比损失求导时只计算左支的梯度，可以理解为BYOL动量更新时$m=0$
+  - 引入了一个类似EM算法的二步优化过程
+  - 左支多出来的预测头和不求导操作这两者都对避免表示塌缩起到了关键性的作用，缺一不可，我们可以确定不对称结构是关键
+- **损失函数：**
+  - $L_{\theta}(v,v^`) = -\frac1 2·(\frac{<f_{\theta}(v),sg_{\xi}(v^`)>}{||f_{\theta}(v)||_2·||sg_{\xi}(v^`)||_2} +\frac{<f_{\theta}(v),sg_{\xi}(v^`)>}{||f_{\theta}(v^`)||_2·||sg_{\xi}(v)||_2} )$
+  - 其中$sg$为停止求导操作(stop gradient)
 
 ## 三. 文本对比学习
 
-- (样例)与(负样例)对比，尽可能不相似
-- (样例)与(正样例)对比，尽可能相似
-- 相似--> 语义空间更加接近
+- 对比什么：
+  - (样例)与(负样例)对比，尽可能不相似
+  - (样例)与(正样例)对比，尽可能相似
+  - 相似--> 语义空间更加接近
 
 ### ConSERT
 
-利用对比学习思想进行句表示学习，在语义文本相似度匹配（STS）等任务上超过了SOTA
+<img src="readme.assets/image-20210816221222725.png" alt="image-20210816221222725" style="zoom:67%;" />
+
+- **缘由：**
+  - **Bert句向量区分语义相近和语义不相近困难，而对比学习通过告诉模型拉远负例间的举例**：Bert学到的词表示根据词频呈现不均匀分布，高频词离原点更近且彼此间距离更近，低频词离原点更远且更稀疏，因此平均后高频词对最终句表示的影响更大，导致Bert学到的句表示对语义变化不敏感
+- **组成：**
+  - 基本与SimCLR相同，只是把ResNet换成了Bert，并且去掉了映射头
+  - 对比损失就是InfoNCE
+  - 数据增强：词级别的词换序、删词，和表示级别的对抗扰动、删特征和输入dropout
+  - 将Bert中原有的dropout率设为0，以保证正负样例对应的编码结构相同
+- 利用对比学习思想进行句表示学习，在语义文本相似度匹配（STS）等任务上超过了SOTA
 
 ### SimCSE
+
+- **SimCSE和ConSERT比较：**
+  - 把映射头又加上了，最大的区别就是数据增强方式
+  - SimCSE的增强方式只有一种，Dropout，不是ConSERT中对输入的表示做dropout，而是BERT里原本的Dropout
 
 ## 图对比学习
 
@@ -105,5 +188,8 @@
     - 全局层次的知识对整个数据集图之间的相似性信息进行编码，并帮助学习具有更丰富语义的表示。
   - 整个模型通过双对比目标学习。
 
+## 参考
 
+### 参考文献：
 
+Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross B. Girshick. Momentum contrast for unsupervised visual representation learning. In 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2020.[2]Ting Chen, Simon Kornblith, Mohammad Norouzi, and Geoffrey E. Hinton. A simple framework for contrastive learning of visual representations. In Proceedings of the 37th International Conference on Machine Learning, ICML 2020.[3]Jean-Bastien Grill, Florian Strub, Florent Altch´e, Corentin Tallec, Pierre H. Richemond, Elena Buchatskaya, Carl Doersch, Bernardo Avila´ Pires, Zhaohan Guo, Mohammad Gheshlaghi Azar, Bilal Piot, Koray Kavukcuoglu, R´emi Munos, and Michal Valko. Bootstrap your own latent - A new approach to self-supervised learning. Annual Conference on Neural Information Processing Systems 2020, NeurIPS 2020.[4]Xinlei Chen and Kaiming He. Exploring simple siamese representation learning. CoRR, abs/2011.10566, 2020.[5]Yuanmeng Yan, Rumei Li, Sirui Wang, Fuzheng Zhang, Wei Wu, and Weiran Xu. Consert: A contrastive framework for self-supervised sentence representation transfer. CoRR, abs/2105.11741, 2021.[6]Tianyu Gao, Xingcheng Yao, and Danqi Chen. Simcse: Simple contrastive learning of sentence embeddings. CoRR, abs/2104.08821, 2021.[7]Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. BERT: pre-training of deep bidirectional transformers for language understanding. In Jill Burstein, Christy Doran, and Thamar Solorio, editors, Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, NAACL-HLT 2019, Association for Computational Linguistics, 2019.[8]Raia Hadsell, Sumit Chopra, and Yann LeCun. Dimensionality reduction by learning an invariant mapping. In 2006 IEEE Computer Society Conference on Computer Vision and Pattern Recognition (CVPR 2006). IEEE Computer Society, 2006.[9]Ching-Yao Chuang, Joshua Robinson, Yen-Chen Lin, Antonio Torralba, and Stefanie Jegelka. Debiased contrastive learning. In Hugo Larochelle, Marc’Aurelio Ranzato, Raia Hadsell, Maria-Florina Balcan, and Hsuan-Tien Lin, editors, Advances in Neural Information Processing Systems 33: Annual Conference on Neural Information Processing Systems 2020, NeurIPS 2020.[10]Tongzhou Wang and Phillip Isola. Understanding contrastive representation learning through alignment and uniformity on the hypersphere. In Proceedings of the 37th International Conference on Machine Learning, ICML 2020.[11]Sumit Chopra, Raia Hadsell, and Yann LeCun. Learning a similarity metric discriminatively, with application to face verification. In 2005 IEEE Computer Society Conference on Computer Vision and Pattern Recognition (CVPR 2005), IEEE Computer Society, 2005.[12]Florian Schroff, Dmitry Kalenichenko, and James Philbin. Facenet: A unified embedding for face recognition and clustering. In IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2015, IEEE Computer Society, 2015.[13]Michael Gutmann and Aapo Hyv¨arinen. Noise-contrastive estimation: A new estimation principle for unnormalized statistical models. In Yee Whye Teh and D. Mike Titterington, editors, Proceedings of the Thirteenth International Conference on Artificial Intelligence and Statistics, AISTATS 2010.[14]A¨aron van den Oord, Yazhe Li, and Oriol Vinyals. Representation learning with contrastive predictive coding. CoRR, 2018.[15]Zhirong Wu, Yuanjun Xiong, Stella X. Yu, and Dahua Lin. Unsupervised feature learning via nonparametric instance discrimination. In 2018 IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2018. IEEE Computer Society, 2018.[16]Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In CVPR, 2016.[17]Bohan Li, Hao Zhou, Junxian He, Mingxuan Wang, Yiming Yang, and Lei Li. On the sentence embeddings from pre-trained language models. Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing, EMNLP 2020, Online.Association for Computational Linguistics, 2020.
