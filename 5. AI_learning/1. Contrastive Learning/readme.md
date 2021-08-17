@@ -8,7 +8,7 @@
 
 - 用处：学习同类之间的共同特征，区分非同类实例之间的不同之处。在抽象语义级别的特征空间上学会区分数据
 
-- 目标：是学习一个编码器，此编码器对同类数据进行相似的编码，并使得不同类的数据的编码尽可能不同。
+- 目标：是学习一个编码器，此编码器对同类数据进行相似的编码，并使得不同类的数据的编码尽可能不同。（**通过自动构造相似实例和不相似实例，学习一个表示学习模型**）
 
 - 核心：学习$f$这个映射函数，把实例$x$编码成$f(x)$，使得$f$满足：$$ s(f(x),f(x^+)) >> s(f(x),f(x^-))$$
 
@@ -65,13 +65,16 @@
 
 ### Memory Bank
 
-- **缘由：**使用infoNCE loss的时候，一般希望能提供尽量多的负样例及逆行优化，但运算能力有限
-- **思想：**在开始训练之前，先将所有图片的表示计算好储存起来，叫做memory bank。
+- **缘由：**
+  - 使用infoNCE loss的时候，一般希望能提供尽量多的负样例及逆行优化，但运算能力有限
+  - 负样本数量必然会受到batch_size大小的限制
+- **思想：**在开始训练之前，先将所有图片的表示计算好储存起来，叫做memory bank。（解耦合dictionary size与mini-batch size）
   - **Bank中的表示将作为负例**的表示参与构建对比损失
   - 每次迭代更新参数后，当前batch中样例对应的memory bank中的表示将会用更新后的参数更新，以这样的方式慢慢更新memory bank中的样例表示。
   - 这种方式就不需要对大量负样例做前馈和反向传播运算，大大降低了运算量。
+  - Memory Bank模型解耦合dictionary size与mini-batch size，即负样本不在每个batch中进行选取，而是在所有样本的特征组成的bank中进行采样，通过**随机采样**，一定程度上可以认为一个query采样的负样本能代表所有样本
 - **缺点**
-  - 当样例数目很大时，需要占用极大的内存。
+  - 当样例数目很大时，需要占用极大的内存。（每一次更新重新encode一次所有样本，内存需求较大，如果只是更新下一次采样的k个样本，得到的表示和参数更新存在一定的滞后）
   - 样例迭代太慢，由于不同步更新的表示对应的表示函数不同，第一步batch更新的表示和第10000步batch更新的表示对应的函数参数可能差别非常大，造成了不一致的情况，那这两种表示进行对比会有很大的噪声。
 
 ### MoCo v1
@@ -79,13 +82,27 @@
 ![image-20210816194952077](readme.assets/image-20210816194952077.png)
 
 - **缘由：**针对Memory Bank存在的缺陷
+- **关注点：**
+  - 重点关注样本数量对学习到的质量的影响
+  - **正样本生成方法：**随机裁剪，生成两个区域，同一张图片的两个区域是正样本
+  - **负样本生成方法：**不同图片的两个区域是负样本
 - **思想：**
-  - MoCo不再和Memory Bank一样，存储所有的样例，而是保留了一个相对较短**固定长度动态更新**的队列
+  - **momentum encoder：**MoCo不再和Memory Bank一样，存储所有的样例，而是保留了一个相对较短**固定长度动态更新**的队列
   - 每次迭代后，当前batch通过$f^k_{\theta_k}$前馈得到的新的样例表示将加入队列，而最早加入队列的相同数目也会同时被移除队列，以保证固定长度
   - 首先降低了占用内存的大小，同时保证队列中最早和最新的表示差距不至于过大，保证了一致性，使得对比模型训练更加稳定。
 - **算法：**
 
 ![image-20210816195350012](readme.assets/image-20210816195350012.png)
+
+### MoCo V2
+
+- 改进了数据增强的方法，增加了使用blur augmentation进行增强
+- 在encoder得到表示后添加了非线性层等
+
+### MoCo V3
+
+- encoder使用Visual Transformer
+- 主要解决了对比学习在ViT训练过程中表现出的不稳定性。
 
 ### SimCLR
 
@@ -145,6 +162,13 @@
   - $L_{\theta}(v,v^`) = -\frac1 2·(\frac{<f_{\theta}(v),sg_{\xi}(v^`)>}{||f_{\theta}(v)||_2·||sg_{\xi}(v^`)||_2} +\frac{<f_{\theta}(v),sg_{\xi}(v^`)>}{||f_{\theta}(v^`)||_2·||sg_{\xi}(v)||_2} )$
   - 其中$sg$为停止求导操作(stop gradient)
 
+### MIT：硬负样本的对比学习
+
+![image-20210816231611438](readme.assets/image-20210816231611438.png)
+
+- **缘由：**如何为对比学习抽取更好的负样本呢？
+- [2010.04592.pdf (arxiv.org)](https://arxiv.org/pdf/2010.04592.pdf)
+
 ## 三. 文本对比学习
 
 - 对比什么：
@@ -171,7 +195,7 @@
   - 把映射头又加上了，最大的区别就是数据增强方式
   - SimCSE的增强方式只有一种，Dropout，不是ConSERT中对输入的表示做dropout，而是BERT里原本的Dropout
 
-## 图对比学习
+## 四. 图对比学习
 
 ### MoCL:Contrastive Learning on Molecular Graphs with Multi-level Domain Knowledge
 
@@ -188,8 +212,31 @@
     - 全局层次的知识对整个数据集图之间的相似性信息进行编码，并帮助学习具有更丰富语义的表示。
   - 整个模型通过双对比目标学习。
 
+## 五, 推荐对比学习
+
+###  基于协同对比学习的自监督异质图神经网络
+
+
+
+## 六. 损失函数
+
+### 联合对比损失 JCL
+
+![image-20210816234648360](readme.assets/image-20210816234648360.png)
+
+- **思想：**
+  - 同时学习无限数量的查询键值对，在搜索不变特征时带来更严格的约束
+  - 推导出公式的上界，允许以端到端训练的方式进行解析，强烈支持在灭个实例特定类内的相似性，因此在搜索不同实例之间的区别特征时仍然具有优势
+- **代码：**[caiqi/Joint-Contrastive-Learning (github.com)](https://github.com/caiqi/Joint-Contrastive-Learning)
+
+### 参数化对比学习 PaCo损失
+
+- **缘由：**
+  - 处理长尾识别
+  - 监督对比损失在高频类别上有偏执的倾向，从而增加了不平衡学习的难度。
+- **思想：**
+  - PaCo可以自适应地增强同类样本的推近强度，并有利于较难的示例学习
+- **代码：**https://github.com/jiequancui/Parametric-Contrastive-Learning
+
 ## 参考
 
-### 参考文献：
-
-Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross B. Girshick. Momentum contrast for unsupervised visual representation learning. In 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2020.[2]Ting Chen, Simon Kornblith, Mohammad Norouzi, and Geoffrey E. Hinton. A simple framework for contrastive learning of visual representations. In Proceedings of the 37th International Conference on Machine Learning, ICML 2020.[3]Jean-Bastien Grill, Florian Strub, Florent Altch´e, Corentin Tallec, Pierre H. Richemond, Elena Buchatskaya, Carl Doersch, Bernardo Avila´ Pires, Zhaohan Guo, Mohammad Gheshlaghi Azar, Bilal Piot, Koray Kavukcuoglu, R´emi Munos, and Michal Valko. Bootstrap your own latent - A new approach to self-supervised learning. Annual Conference on Neural Information Processing Systems 2020, NeurIPS 2020.[4]Xinlei Chen and Kaiming He. Exploring simple siamese representation learning. CoRR, abs/2011.10566, 2020.[5]Yuanmeng Yan, Rumei Li, Sirui Wang, Fuzheng Zhang, Wei Wu, and Weiran Xu. Consert: A contrastive framework for self-supervised sentence representation transfer. CoRR, abs/2105.11741, 2021.[6]Tianyu Gao, Xingcheng Yao, and Danqi Chen. Simcse: Simple contrastive learning of sentence embeddings. CoRR, abs/2104.08821, 2021.[7]Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. BERT: pre-training of deep bidirectional transformers for language understanding. In Jill Burstein, Christy Doran, and Thamar Solorio, editors, Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, NAACL-HLT 2019, Association for Computational Linguistics, 2019.[8]Raia Hadsell, Sumit Chopra, and Yann LeCun. Dimensionality reduction by learning an invariant mapping. In 2006 IEEE Computer Society Conference on Computer Vision and Pattern Recognition (CVPR 2006). IEEE Computer Society, 2006.[9]Ching-Yao Chuang, Joshua Robinson, Yen-Chen Lin, Antonio Torralba, and Stefanie Jegelka. Debiased contrastive learning. In Hugo Larochelle, Marc’Aurelio Ranzato, Raia Hadsell, Maria-Florina Balcan, and Hsuan-Tien Lin, editors, Advances in Neural Information Processing Systems 33: Annual Conference on Neural Information Processing Systems 2020, NeurIPS 2020.[10]Tongzhou Wang and Phillip Isola. Understanding contrastive representation learning through alignment and uniformity on the hypersphere. In Proceedings of the 37th International Conference on Machine Learning, ICML 2020.[11]Sumit Chopra, Raia Hadsell, and Yann LeCun. Learning a similarity metric discriminatively, with application to face verification. In 2005 IEEE Computer Society Conference on Computer Vision and Pattern Recognition (CVPR 2005), IEEE Computer Society, 2005.[12]Florian Schroff, Dmitry Kalenichenko, and James Philbin. Facenet: A unified embedding for face recognition and clustering. In IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2015, IEEE Computer Society, 2015.[13]Michael Gutmann and Aapo Hyv¨arinen. Noise-contrastive estimation: A new estimation principle for unnormalized statistical models. In Yee Whye Teh and D. Mike Titterington, editors, Proceedings of the Thirteenth International Conference on Artificial Intelligence and Statistics, AISTATS 2010.[14]A¨aron van den Oord, Yazhe Li, and Oriol Vinyals. Representation learning with contrastive predictive coding. CoRR, 2018.[15]Zhirong Wu, Yuanjun Xiong, Stella X. Yu, and Dahua Lin. Unsupervised feature learning via nonparametric instance discrimination. In 2018 IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2018. IEEE Computer Society, 2018.[16]Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In CVPR, 2016.[17]Bohan Li, Hao Zhou, Junxian He, Mingxuan Wang, Yiming Yang, and Lei Li. On the sentence embeddings from pre-trained language models. Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing, EMNLP 2020, Online.Association for Computational Linguistics, 2020.
