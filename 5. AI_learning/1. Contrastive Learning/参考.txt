@@ -20,3 +20,26 @@ https://wx.zsxq.com/mweb/views/topicdetail/topicdetail.html?topic_id=41845241214
 https://mp.weixin.qq.com/s/B-6cBEsOhjb4fRz4ESIpfQ
 https://mp.weixin.qq.com/s/Pb1cFIVEqLCit4vCABc4SA
 https://mp.weixin.qq.com/s/ibVE3a7FXJXHByMU_66mdQ
+
+
+能力要求：
+1. 熟悉使用Java，有通信原理、数据结构、C++等计算机基础；
+2. 有android开发基础，且能集成android常用界面组件；
+3. 掌握深度学习框架，但不限于pytorch、tensorflow、Mindspora等；
+4. 有深度学习基础，具有嵌入式模型部署经验者优先；
+4. 具有鸿蒙开发经验者优先
+
+
+工作职责：
+1. 负责团队的“基于鸿蒙系统的摔倒检测深度模型部署”
+
+能力要求：
+1. 熟悉使用Java，有通信原理、数据结构、C++等计算机基础；
+2. 有android开发基础，且能集成android常用界面组件；
+3. 掌握深度学习框架，但不限于pytorch、tensorflow、Mindspora等；
+4. 有深度学习基础，具有嵌入式模型部署经验者优先；
+4. 具有鸿蒙开发经验者优先
+
+
+工作职责：
+1. 负责团队的“基于鸿蒙系统的摔倒检测深度模型部署”
