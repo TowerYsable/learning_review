@@ -59,6 +59,10 @@
   - **均匀性：**不相似样例的表示应该均匀的分布在超球面上
 - 空间的好坏：通过对齐性和均匀性
 
+### 
+
+
+
 ## 二. 图像对比学习
 
 - 样例：不同角度的照片，相同的接近，不同的远离，使得学到的表示可**忽略角度变换带来的细节变动**，进而学到更高维度、更本质的语义信息。
@@ -166,8 +170,52 @@
 
 ![image-20210816231611438](readme.assets/image-20210816231611438.png)
 
-- **缘由：**如何为对比学习抽取更好的负样本呢？
+- **缘由：**如何为对比学习抽取更好的负样本呢？学习对比表示得益于难否定样本（即难以与锚点区分开的点）
+- **思想：**
+  - 提出了一种新的无监督方法来选择难负样本，用户可以在其中控制难负样本的数量
+  - 采样的局限性导致表示会紧密地聚类每个类，并将不同的类推到尽可能远的距离。
 - [2010.04592.pdf (arxiv.org)](https://arxiv.org/pdf/2010.04592.pdf)
+- https://openreview.net/forum?id=CR1XOQ0UTh-
+
+### SeqCLR
+
+![image-20210817102934682](readme.assets/image-20210817102934682.png)
+
+- **缘由：**整图、非序列化的无监督方法从后文的实验中证明对文本识别的效果很差
+
+- **思想：**
+
+  - 目前的对比方法比较从整个图像中计算出的**单个表示**。SeqCLR的对比方法比较从整个图像中计算出的**多个表示**。
+
+- **组成：**
+
+  - **数据增强：**数据增强要避免会产生序列不对齐的增强方式。如图3所示，垂直裁剪保持序列对齐，而水平翻转会产生序列不对齐。
+
+  ![image-20210817103055473](readme.assets/image-20210817103055473.png)
+
+  - **编码器（Base Encoder）**：编码器由CNN和BiLSTM构成。图片经过编码器后会得到带有上下文信息的序列。
+  - **投影头（Projection Head）**：由于多层感知器MLP只能处理定长的序列，而这里的输入图片是不定长的。所以投影头会根据后面的实例映射方式来决定。对于Frame-to-instance的实例映射方式，投影头采用多层感知器MLP；对于Window-to-instance和All-to-instance的实例映射方式，投影头采用BiLSTM。
+  - **实例映射（Instance Mapping）**：实例映射有三种方式，分别是All-to-instance、Window-to-instance和Frame-to-instance。
+    - All-to-instance表示取每一张特征图的平均值，然后形成一个具有通道数长度的实例向量；
+    - Window-to-instance表示每一张特征图自适应平均池化T（文中T=5）个值，然后形成T个实例向量；
+    - Frame-to-instance表示特征图进行恒等映射，然后形成特征图宽度数量的实例向量。
+
+  ![image-20210817103249175](readme.assets/image-20210817103249175.png)
+
+- 损失函数：NCE
+
+### 表示的不变性
+
+- **缘由：**使得通过对比学学习获取表达具有不变性，更加直接地强制不变性
+- **思想：**
+  - 训练目标：使用新地正则化器来控制表达如何在变换下发生变化
+  - 特征平均方法：将原始输入地多次转换中地编码进行组合，这回带来全面地性能提升
+- paper：https://openreview.net/forum?id=NomEDgIEBwE
+
+### 不变空间与变化空间
+
+- **缘由：**什么对比，什么不对比
+- paper:https://openreview.net/forum?id=CZ8Y3NzuVzO
 
 ## 三. 文本对比学习
 
@@ -195,6 +243,46 @@
   - 把映射头又加上了，最大的区别就是数据增强方式
   - SimCSE的增强方式只有一种，Dropout，不是ConSERT中对输入的表示做dropout，而是BERT里原本的Dropout
 
+### ANCE （DR）
+
+![image-20210817094503261](readme.assets/image-20210817094503261.png)
+
+- **任务：**稠密文本检索(DR)
+- **缘由：**
+  - 在稠密的表示空间中进行文本检索一般效果不错
+  - 端到端的学习稠密检索通常比不过基于单词的稀疏检索
+- **思路：**
+  - 理论上说明稠密几所的学习瓶颈：对局部采样的非信息性负数进行控制，导致梯度范数减小，随机梯度方差大，学习收敛慢
+  - 提出“近似最近邻居负对比学习”
+    - 异步更新的ANN检索从整个语料库中全局选择难训练否定词的学习机制
+- **结论：**
+  - ANCE在网络搜索、问答、商业搜索环境中有效
+  - 使用ANCE进行负采样可以更好地近似基于oracle梯度范数的重要性采样，从而提高了随机训练的收敛性
+- paper：[Approximate Nearest Neighbor Negative Contrastive Learning for Dense Text Retrieval | OpenReview](https://openreview.net/forum?id=zeFrfgyZln)
+
+### **Contrastive Learning with Adversarial Perturbations for Conditional Text Generation** 
+
+![image-20210817095421968](readme.assets/image-20210817095421968.png)
+
+- **任务：**文本生成（提出了一种方法来生成正样本和负样本，用于seq2seq模型的对比学习，更好地区分正确的输出和错误的输出）
+- **缘由：**
+  - Transformer在文本生成任务有很大的优势
+  - **曝光偏差：**但是，大多数的训练中，每个步骤都给定了ground truth标签，而在训练过程中没有显示其错误生成地词（token），这不利于将其推广到未知地输入上
+- **思路：**
+  - 将正样本对和负样本对进行对比缓解条件文本生成问题
+- paper：https://openreview.net/forum?id=Wga_hrCa3P3
+
+### SSA
+
+![image-20210817104314360](readme.assets/image-20210817104314360.png)
+
+- **缘由：**基于aspect的自动编码器，遇到了一些问题，例如提取嘈杂的aspect以及将模型发现的aspect映射到感兴趣的aspect的情况很差。
+- **任务：**无监督的方面(aspect)检测，自动的抽取可解释的aspect，并从在线评论中识别aspect特定的片段
+- **思想：**提出一种自监督的对比学习框架和一种基于注意力的模型
+  - 具有用于UAD任务的新型平滑自注意（smooth self-attention, SSA）模块，以便学习aspect和review segments的更好表示。
+  - 引入了高分辨率选择性映射（high-resolution selective mapping, HRSMap）方法，以将模型发现的aspect有效地分配给感兴趣的aspect。
+  - 使用知识蒸馏技术来进一步提高aspect检测性能
+
 ## 四. 图对比学习
 
 ### MoCL:Contrastive Learning on Molecular Graphs with Multi-level Domain Knowledge
@@ -212,13 +300,51 @@
     - 全局层次的知识对整个数据集图之间的相似性信息进行编码，并帮助学习具有更丰富语义的表示。
   - 整个模型通过双对比目标学习。
 
-## 五, 推荐对比学习
+### **Contrastive and Generative Graph Convolutional Networks for Graph-based Semi-Supervised**
 
-###  基于协同对比学习的自监督异质图神经网络
+- **任务：**将少量标记数据的标签转移到其余大量未标记数据
+- **思想：**提出了一种新颖的基于GCN的SSL算法，通过利用数据相似性和图结构来丰富监督信号
+  - 通过设计一个半监督的对比损失，可以通过最大化相同数据的不同视图或相同类数据之间的一致性来生成改进的节点表示。因此，丰富的未标记数据和稀缺而有价值的标记数据可以共同提供丰富的监督信息，以学习判别性节点表示形式，有助于改善后续的分类结果。
+  - 通过设计一个半监督的对比损失，可以通过最大化相同数据的不同视图或相同类数据之间的一致性来生成改进的节点表示。
 
+### JOAO
 
+## 五. 多模态对比学习
 
-## 六. 损失函数
+### DEMI
+
+- **名称：**互信息分解估计的对比表示学习
+- **任务：**对话生成学习
+
+![image-20210817091203046](readme.assets/image-20210817091203046.png)
+
+- 依赖于上下文的多个视图之间的互信息
+  - 将序列分割成包含序列中某个步骤的过去和未来的视图
+- 互信息(MI)的下界比较容易优化
+
+### UNIMO
+
+![image-20210817105506408](readme.assets/image-20210817105506408.png)
+
+- **Towards Unified-Modal Understanding and Generation via Cross-Modal Contrastive Learning**
+- **思想：**
+  - 同时利用大规模单模文本、单模图像以及多模图文对数据进行联合学习
+  - 通过跨模态对比学习方法，有效地对语言知识与视觉知识进行统一表示和相互增强，从而具备同时处理多种单模态和多模态下游任务的能力。
+- paper：https://arxiv.org/abs/2012.15409
+- GitHub：https://github.com/PaddlePaddle/Research/tree/master/NLP/UNIMO
+
+## 六. GAN对比学习
+
+### ContraD
+
+- **缘由：**防止判别器过拟合，重新审视各种数据增强
+- **思想：**
+  - 将最新地对比表示学习方案整合到判别器中
+    - 鉴别人员可进行更强大地扩增，而不造成灾难性遗忘
+    - 对比学习本身也受益于GAN训练，即保持真实样本与假样本之间的区别性特征，表明这两个方式具有很强的连贯性
+- paper：https://openreview.net/forum?id=eo6U4CAwVmg
+
+## 七. 损失函数
 
 ### 联合对比损失 JCL
 
@@ -237,6 +363,18 @@
 - **思想：**
   - PaCo可以自适应地增强同类样本的推近强度，并有利于较难的示例学习
 - **代码：**https://github.com/jiequancui/Parametric-Contrastive-Learning
+
+### Gradient Regularized Contrastive Learning for Continual Domain Adaptation
+
+![image-20210817105159101](readme.assets/image-20210817105159101.png)
+
+- **缘由：**深度学习自适应环境的能力较差
+- **任务：**
+  - 研究连续域自适应，其中模型带有标记的源域和一系列未标记的目标域
+  - **存在的问题：**领域转移和灾难性遗忘
+- **思想：**提出梯度正则化对比学习
+  - 强制进行对比损失的梯度，不增加源域的监督训练损失，从而保持学习特征的判别力
+  - 规范了新域上的梯度更新，而不会增加旧目标域上的分类损失，这使得模型能够适应传入的目标域，同时保留先前观察到的域的性能
 
 ## 参考
 
