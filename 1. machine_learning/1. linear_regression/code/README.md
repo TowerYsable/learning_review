@@ -113,9 +113,3 @@ plot.show()
 
 ## [8.完整代码](https://github.com/NLP-LOVE/ML-NLP/blob/master/Machine%20Learning/Liner%20Regression/demo/housing_price.py)
 
-------
-
-> 作者：[@mantchs](https://github.com/mantchs)
->
-> 欢迎大家加入讨论！共同完善此项目！<a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=863f915b9178560bd32ca07cd090a7d9e6f5f90fcff5667489697b1621cecdb3"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="NLP面试学习群" title="NLP面试学习群"></a>
-
