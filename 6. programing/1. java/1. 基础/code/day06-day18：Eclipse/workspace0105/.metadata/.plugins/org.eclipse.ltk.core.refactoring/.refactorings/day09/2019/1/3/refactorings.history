@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.atguigu.java.String&apos; to &apos;ArrayUtil&apos;&#x0D;&#x0A;- Original project: &apos;day09&apos;&#x0D;&#x0A;- Original element: &apos;com.atguigu.java.String&apos;&#x0D;&#x0A;- Renamed element: &apos;com.atguigu.java.ArrayUtil&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;String&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;com.atguigu.java{String.java[String" matchStrategy="1" name="ArrayUtil" qualified="false" references="true" similarDeclarations="false" stamp="1547607255269" textual="false" version="1.0"/>
+</session>
