@@ -1,0 +1,31 @@
+tower.ysable@gmail.com
+
+git：
+Towerysable
+LZT13531885442@lzt
+
+http://www.portaudio.com/archives/pa_stable_v190600_20161030.tgz
+
+(1)、在要上传的文件夹下鼠标右键点击Git Bash Here，随即会出现一个命令框，并输入如下命令：（每一步做完输入回车）
+
+(2)、让git管理，初始化：git init
+
+(3)、收集文件夹下所有文件暂存：git add . （注意这里结尾空格后有一个点，并且如果文件多的话，这个过程会有点长）
+
+(4)、由于第一次上传，第二次上传则不需要下边三步（这几步必须放在git commit之前写）：
+
+　　(a)、输入你的邮箱：git config --global user.email "you@example.com"
+
+　　(b)、输入你的名字：git config --global user.name "Your Name"
+
+　　(c)、要上传的码云的代码仓库地址：git remote add [自己设置，简短好记的][代码仓库的URL]
+
+　　　　例如：git remote add origin https://gitee.com/haiyoushui/mypython.git
+
+(5)、做一个记录：git commit -m “第一次上传”
+
+(6)、上传：git push origin master （第一次需要：git push -u origin master）
+
+　　执行时会让你输入账号密码，输入后就可以继续执行了
+
+(7)、打开码云，就可以看到代码仓库中有了哦
