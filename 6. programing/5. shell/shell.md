@@ -1,20 +1,20 @@
 https://myshell-note.readthedocs.io/en/latest/
 
-# [一、基础知识](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id13)
+# 一、基础知识
 
-## [一、Shell简介](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id14)
+## 一、Shell简介
 
 Shell 是一个 C 语言编写的脚本语言，它是用户与 Linux 的桥梁，用户输入命令交给 Shell 处理， Shell 将相应的操作传递给内核（Kernel），内核把处理的结果输出给用户。
 
 程序=指令+数据
 
-## [二、Shell分类](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id15)
+## 二、Shell分类
 
-### [2.1 图形界面 Shell（GUI Shell）](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id16)
+### 2.1 图形界面 Shell（GUI Shell）
 
 GUI 为 Unix 或者类 Unix 操作系统构造一个功能完善、操作简单以及界面友好的桌面环境。主流桌面环境有 KDE，Gnome 等。
 
-### [2.2 命令行界面 Shell（CLI Shell）](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id17)
+### 2.2 命令行界面 Shell（CLI Shell）
 
 CLI 是在用户提示符下键入可执行指令的界面，用户通过键盘输入指令，完成一系列操作。
 
@@ -44,7 +44,7 @@ CLI 是在用户提示符下键入可执行指令的界面，用户通过键盘�
 
 注意：见名知意，后缀规范为`.sh`
 
-## [三、第一个Shell](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id18)
+## 三、第一个Shell
 
 ```
 #!/bin/bash
@@ -53,9 +53,9 @@ echo "this is my first shell script"
 
 `#!` 告诉系统其后路径所指定的程序即是解释此脚本文件的 Shell 程序 `/bin/bash` 指定使用的是那种shell `echo`在终端打印出内容
 
-## [四、执行Shell的三种方法](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id19)
+## 四、执行Shell的三种方法
 
-### [4.1 直接bash执行](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id20)
+### 4.1 直接bash执行
 
 ```
 [root@shell workspace]# ll
@@ -69,7 +69,7 @@ echo "this is my first script"
 this is my first script
 ```
 
-### [4.2 ./执行](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id21)
+### 4.2 ./执行
 
 ```
 [root@shell workspace]# ./01-scripts.sh
@@ -84,14 +84,14 @@ this is my first script
 
 这种方式默认根据脚本第一行指定的解释器处理，如果没写以当前默认 Shell 解释器执行。
 
-### [4.3 source执行](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id22)
+### 4.3 source执行
 
 ```
 [root@shell workspace]# source 01-scripts.sh
 this is my first script
 ```
 
-## [五、Shell变量](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id23)
+## 五、Shell变量
 
 变量名+内存空间
 
@@ -99,7 +99,7 @@ this is my first script
 
 弱类型变量，所有变量类型视为字符串类型，对于数值相加自动转换为数组类型，无需实现声明
 
-### [5.1 变量命名规则：](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id24)
+### 5.1 变量命名规则：
 
 - 命名只能使用英文字母，数字和下划线，首个字符不能以数字开头。
 - 中间不能有空格，可以使用下划线（_）。
@@ -115,7 +115,7 @@ this is my first script
 
 利用export将本地变量导入到环境，扩大作用范围
 
-### [5.2 系统内置变量](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id25)
+### 5.2 系统内置变量
 
 在命令行提示符直接执行`env、set`查看系统或环境变量。`env` 显示用户环境变量，`set` 显示 Shell 预先定义好的变量以及用户变量。可以通过 `export` 导出成用户变量。
 
@@ -176,7 +176,7 @@ bashrc 类型： * 定义本地变量 * 定义命令别名
 
 非交互式登录shell： 加载顺序：~/.bashrc -> /etc/bashrc -> /etc/profile.d/*
 
-### [5.3 用户自定义变量](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id26)
+### 5.3 用户自定义变量
 
 - 普通变量
 
@@ -209,7 +209,7 @@ unset variable_name
 
 变量被删除后不能再次使用。unset 命令不能删除只读变量。
 
-### [5.4 变量引用](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id27)
+### 5.4 变量引用
 
 - = 变量赋值
 - += 变量相加
@@ -223,7 +223,7 @@ unset variable_name
 
 为避免特殊字符及变量与字符连接使用，建议引用变量添加大括号
 
-## [六、引号](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id28)
+## 六、引号
 
 单引号是告诉 Shell 忽略特殊字符，而双引号则解释特殊符号原有的意义，比如$、！。
 
@@ -242,7 +242,7 @@ bb $var2
 bb aa
 ```
 
-## [七、注释](https://myshell-note.readthedocs.io/en/latest/shell-01-基础知识.html#id29)
+## 七、注释
 
 - 单行注释使用`#`
 - 多行注释固定函数格式
@@ -254,11 +254,11 @@ bb aa
 EOF
 ```
 
-# [二、字符串与数组](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id12)
+# 二、字符串与数组
 
-## [一、字符串常用操作](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id13)
+## 一、字符串常用操作
 
-### [1.1 获取字符串长度](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id14)
+### 1.1 获取字符串长度
 
 利用`${#var}`来获取字符串长度
 
@@ -268,7 +268,7 @@ EOF
 9
 ```
 
-### [1.2 字符串切片](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id15)
+### 1.2 字符串切片
 
 格式：
 
@@ -292,7 +292,7 @@ ll
 sh
 ```
 
-### [1.3 字符串替换](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id16)
+### 1.3 字符串替换
 
 格式：${parameter/pattern/string}
 
@@ -302,7 +302,7 @@ sh
 hello world
 ```
 
-### [1.4 字符串截取](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id17)
+### 1.4 字符串截取
 
 格式：
 
@@ -331,7 +331,7 @@ https://www.baidu.com
 https:
 ```
 
-### [1.5 变量状态赋值](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id18)
+### 1.5 变量状态赋值
 
 ${VAR:-string} 如果 VAR 变量为空则返回 string
 
@@ -359,11 +359,11 @@ string
 for i in `cat /etc/group`;do echo ${i%%:*};done
 ```
 
-## [二、数组](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id19)
+## 二、数组
 
 bash支持一维数组（不支持多维数组），并且没有限定数组的大小。数组是相同类型的元素按一定顺序排列的集合。 类似与 C 语言，数组元素的下标由 0 开始编号。获取数组中的元素要利用下标，下标可以是整数或算术表达式，其值应大于或等于 0。
 
-### [2.1 数组定义](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id20)
+### 2.1 数组定义
 
 在 Shell 中，用括号来表示数组，数组元素用“空格”符号分割开
 
@@ -376,7 +376,7 @@ aa
 aa bb cc 1123
 ```
 
-### [2.2 数组元素读取](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id21)
+### 2.2 数组元素读取
 
 ```
 [root@xuel-tmp-shell ~]# args1=(aa bb cc 1123)
@@ -402,7 +402,7 @@ check_url_for.sh check_url_while01.sh check_url_while02.sh func01.sh func02.sh f
 filelist=($(ls));for i in ${!filelist[@]};do echo ${filelist[$i]};done
 ```
 
-## [三、字符显示颜色](https://myshell-note.readthedocs.io/en/latest/shell-02-字符串与数组.html#id22)
+## 三、字符显示颜色
 
 | 字体颜色      | 字体背景颜色                                              | 显示方式        |
 | ------------- | --------------------------------------------------------- | --------------- |
@@ -436,11 +436,11 @@ for i in {30..37};do echo -e "\033[$i;40m hello world \033[0m";done
 for i in {40..47};do echo -e "\033[47;${i}m hello world! \033[0m";done
 ```
 
-# [三、运算符](https://myshell-note.readthedocs.io/en/latest/shell-03-运算符.html#id8)
+# 三、运算符
 
-## [一、Shell表达式](https://myshell-note.readthedocs.io/en/latest/shell-03-运算符.html#id9)
+## 一、Shell表达式
 
-### [1.1 整数比较符](https://myshell-note.readthedocs.io/en/latest/shell-03-运算符.html#id10)
+### 1.1 整数比较符
 
 | 比较符                | 描述       | 示例                |
 | --------------------- | ---------- | ------------------- |
@@ -470,7 +470,7 @@ false
 false
 ```
 
-### [1.2 算术运算符](https://myshell-note.readthedocs.io/en/latest/shell-03-运算符.html#id11)
+### 1.2 算术运算符
 
 假定变量 a 为 10，变量 b 为 20： 注意：运算符两边有空格
 
@@ -487,26 +487,26 @@ C=$(($A+$B))
 C=`expr $A + $B`
 ```
 
-### [1.3 布尔运算符](https://myshell-note.readthedocs.io/en/latest/shell-03-运算符.html#id12)
+### 1.3 布尔运算符
 
-### [1.4 逻辑运算符](https://myshell-note.readthedocs.io/en/latest/shell-03-运算符.html#id13)
+### 1.4 逻辑运算符
 
 | 运算符 | 说明       | 举例                                     |
 | ------ | ---------- | ---------------------------------------- |
 | &&     | 逻辑的 AND | [[ a -lt 100 && ​b -gt 100 ]] 返回 false  |
 | \|\|   | 逻辑的 OR  | [[ $a -lt 100 || $b -gt 100 ]] 返回 true |
 
-### [1.5 文件测试运算符](https://myshell-note.readthedocs.io/en/latest/shell-03-运算符.html#id14)
+### 1.5 文件测试运算符
 
-### [1.6 字符串测试](https://myshell-note.readthedocs.io/en/latest/shell-03-运算符.html#id15)
+### 1.6 字符串测试
 
 假定变量 a 为 “abc”，变量 b 为 “efg”：
 
-# [四、流程控制](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id5)
+# 四、流程控制
 
-## [一、if语句](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id6)
+## 一、if语句
 
-### [1.1 单分支](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id7)
+### 1.1 单分支
 
 ```
 if condition
@@ -524,7 +524,7 @@ eg:
 if [ `ps -ef |grep /usr/sbin/sshd|grep -v grep|wc -l` -eq 1 ];then echo "sshd server exist";fi
 ```
 
-### [1.2 双分支](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id8)
+### 1.2 双分支
 
 ```
 if condition
@@ -544,7 +544,7 @@ eg:
 if [ `ps -ef |grep /usr/sbin/sshd|grep -v grep|wc -l` -eq 0 ];then echo "sshd server exist";else echo "sshd server not exist";fi
 ```
 
-### [1.3 多分支](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id9)
+### 1.3 多分支
 
 ```
 if condition1
@@ -574,7 +574,7 @@ else
 fi
 ```
 
-## [二、for循环](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id10)
+## 二、for循环
 
 ```
 for var in item1 item2 ... itemN
@@ -658,7 +658,7 @@ fi
 done
 ```
 
-## [三、while语句](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id11)
+## 三、while语句
 
 格式：
 
@@ -761,7 +761,7 @@ fi
 done <$filename
 ```
 
-## [四、break 和 continue 语句](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id12)
+## 四、break 和 continue 语句
 
 break跳出循环
 
@@ -792,7 +792,7 @@ while [ $N -lt 5 ]; do
 done
 ```
 
-## [五、case语句](https://myshell-note.readthedocs.io/en/latest/shell-04-流程控制.html#id13)
+## 五、case语句
 
 语句
 
@@ -828,13 +828,13 @@ case $1 in
 esac
 ```
 
-# [五、函数](https://myshell-note.readthedocs.io/en/latest/shell-05-函数.html#id7)
+# 五、函数
 
-## [一、概念](https://myshell-note.readthedocs.io/en/latest/shell-05-函数.html#id8)
+## 一、概念
 
 linux shell 可以用户定义函数，然后在shell脚本中可以随便调用,以此来重复调用公共函数，减少代码量。
 
-## [二、格式](https://myshell-note.readthedocs.io/en/latest/shell-05-函数.html#id9)
+## 二、格式
 
 ```
 [ function ] funname()
@@ -874,7 +874,7 @@ function add_num() {
 add_num
 ```
 
-## [三、函数参数](https://myshell-note.readthedocs.io/en/latest/shell-05-函数.html#id10)
+## 三、函数参数
 
 将函数写成无状态的，将数据当做参数进行传入
 
@@ -922,11 +922,11 @@ eg:函数炸弹
 
 递归调用自身，直至系统崩溃
 
-# [六、正则表达式](https://myshell-note.readthedocs.io/en/latest/shell-06-正则表达式.html#id7)
+# 六、正则表达式
 
-## [一、基本正则表达式](https://myshell-note.readthedocs.io/en/latest/shell-06-正则表达式.html#id8)
+## 一、基本正则表达式
 
-### [1.1 字符匹配](https://myshell-note.readthedocs.io/en/latest/shell-06-正则表达式.html#id9)
+### 1.1 字符匹配
 
 - .:匹配任意单个字符
 
@@ -958,7 +958,7 @@ posix字符
 \S 匹配非空白字符
 ```
 
-### [1.2 次数匹配](https://myshell-note.readthedocs.io/en/latest/shell-06-正则表达式.html#id10)
+### 1.2 次数匹配
 
 用在制定的字符后面，表示制定前面的字符出现多少次 * *:匹配前面的字符任意次（0次获无数次） * ?:匹配前面的字符0次或1次 * +:匹配前面的字符至少1次 * {m,}:匹配前面的字符至少m次（默认工作在贪婪模式下，?取消贪婪模式） * {m,n}:匹配前面的字符至少m次，至多n次 eg:
 
@@ -966,7 +966,7 @@ posix字符
 .*:匹配任意字符任意次数
 ```
 
-### [1.3 位置锚定](https://myshell-note.readthedocs.io/en/latest/shell-06-正则表达式.html#id11)
+### 1.3 位置锚定
 
 - ^:行首锚定，用于模式最左边
 - $:行尾锚定,用于模式最右边
@@ -979,7 +979,7 @@ eg:
 ^$:锚定空行
 ```
 
-### [1.4 分组引用](https://myshell-note.readthedocs.io/en/latest/shell-06-正则表达式.html#id12)
+### 1.4 分组引用
 
 分组 * ():将一个或多个字符当成一个整体来进行后续处理
 
