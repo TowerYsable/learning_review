@@ -30,6 +30,8 @@
   - ASR
   - project
   - SP
+  - speech enhancement：
+    - https://github.com/TowerYsable/speech_enhancement_awesome
 - 5.AI_learning
   - contrastive Learning
 - 6.programing
